@@ -1,0 +1,122 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score
+
+
+#Load Data
+input_data = pd.read_csv('hw1_input.csv')
+real_data = pd.read_csv('hw1_real.csv')
+image_data = pd.read_csv('hw1_img.csv')
+
+#Display the first few rows to verify data
+print("Real Data (S11 Real Part):")
+print(real_data.head())
+print("\nInput Data (Geometric Parameters):")
+print(input_data.head())
+print("\nImage Data (S11 Imaginary Part):")
+print(image_data.head())
+
+#Data Summary and Correlation Matrix
+summary = input_data.describe()
+print("\nData Summary:")
+print(summary)
+
+correlation_matrix = input_data.corr()
+print("\nCorrelation Matrix:")
+print(correlation_matrix)
+
+#Standardize Data for PCA
+scaler = StandardScaler()
+scaled_input = scaler.fit_transform(input_data)
+
+#Applying PCA and Cumulative Explained Variance
+pca = PCA()
+pca_components = pca.fit_transform(scaled_input)
+explained_variance = pca.explained_variance_ratio_
+cumulative_variance = np.cumsum(explained_variance)
+
+#Print explained variance for each component and cumulative explained variance
+print("\nExplained Variance by Each Component:")
+print(explained_variance)
+print("\nCumulative Explained Variance:")
+print(cumulative_variance)
+
+#Plot Cumulative Explained Variance
+plt.figure(figsize=(10, 6))
+plt.plot(cumulative_variance, marker='o')
+plt.axhline(0.90, color="r", linestyle="--", label="90% Explained Variance")
+plt.xlabel('Number of Components')
+plt.ylabel('Cumulative Explained Variance')
+plt.title('PCA - Cumulative Explained Variance by Number of Components')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+#Determine number of components explaining 90% variance
+pca_90 = PCA(n_components=0.90)
+pca_90_components = pca_90.fit_transform(scaled_input)
+print(f"Number of components to explain 90% variance: {pca_90.n_components_}")
+
+#S11 Magnitude Calculation and Min Magnitude by Design
+s11_magnitude = np.sqrt(real_data**2 + image_data**2)
+min_indices = s11_magnitude.idxmin(axis=1)
+min_values = s11_magnitude.min(axis=1)
+
+#Display min S11 magnitude and corresponding frequency index for each design
+result = pd.DataFrame({
+    'Design': s11_magnitude.index,
+    'Min Frequency Index': min_indices,
+    'Min S11 Magnitude': min_values
+})
+print("\nMinimum S11 Magnitude by Design:")
+print(result)
+
+#Plot S11 Magnitude Across Frequency for Selected Designs
+num_designs_to_plot = 15
+for i in range(num_designs_to_plot):
+    s11_values = s11_magnitude.iloc[i, :]
+    plt.plot(s11_values, label=f"Design {i+1}")
+plt.xlabel("Frequency Index")
+plt.ylabel("S11 Magnitude")
+plt.title("S11 Magnitude Across Frequency Indices for Selected Designs")
+plt.legend(loc="best")
+plt.grid(True)
+plt.show()
+
+# PCA for Regression Task 
+selected_frequencies = [70, 120]  # Select specific frequency indices for regression target
+y = real_data.iloc[:, selected_frequencies]  # Real part of S11 at selected frequencies
+
+#Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(pca_90_components, y, test_size=0.2, random_state=42)
+
+#Linear Regression Model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+#Predictions on test set and model evaluation
+y_pred = model.predict(X_test)
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print(f"\nLinear Regression Model Performance:")
+print(f"Mean Squared Error (MSE): {mse}")
+print(f"R^2 Score: {r2}")
+
+#Visualizing Predictions vs. True Values
+for i, freq in enumerate(selected_frequencies):
+    plt.figure(figsize=(8, 5))
+    plt.scatter(y_test.iloc[:, i], y_pred[:, i], alpha=0.7, label=f'Frequency {freq}')
+    plt.plot([y_test.iloc[:, i].min(), y_test.iloc[:, i].max()],
+             [y_test.iloc[:, i].min(), y_test.iloc[:, i].max()], 'r--', label="Ideal Fit")
+    plt.xlabel("True S11 (Real Part)")
+    plt.ylabel("Predicted S11 (Real Part)")
+    plt.title(f"S11 Prediction Performance - Frequency {freq}")
+    plt.legend()
+    plt.grid(True)
+    plt.show()

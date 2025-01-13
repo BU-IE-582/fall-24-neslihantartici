@@ -11,5 +11,5 @@ Also, I add my homework2 links on his page.
 [Codes for Homework2]( https://github.com/BU-IE-582/fall-24-neslihantartici/blob/main/codes.md )
 
 Project files: 
-[Report for Group Project](https://github.com/BU-IE-582/fall-24-neslihantartici/blob/main/Group10.html )
+[Report for Group Project](https://bu-ie-582.github.io/fall-24-neslihantartici/Group10.html)
 [Codes for Group Project]( https://github.com/BU-IE-582/fall-24-neslihantartici/blob/main/Group%2010.py )

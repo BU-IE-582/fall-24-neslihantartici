@@ -10,6 +10,6 @@ Also, I add my homework2 links on his page.
 [Report for Homework2](https://github.com/BU-IE-582/fall-24-neslihantartici/blob/main/hw2_neslihantartıcı.pdf )
 [Codes for Homework2]( https://github.com/BU-IE-582/fall-24-neslihantartici/blob/main/codes.md )
 
-Project files: 
+Group 10 Project files: 
 [Report for Group Project](https://bu-ie-582.github.io/fall-24-neslihantartici/Group10.html)
 [Codes for Group Project]( https://github.com/BU-IE-582/fall-24-neslihantartici/blob/main/Group%2010.py )
